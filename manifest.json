@@ -1,0 +1,13 @@
+"background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "GST Invoice Generator",
+  "orientation": "portrait",
+  "scope": "/",
+  "short_name": "Invoicer",
+  "start_url": "https://gst-invoicer-gen.vercel.app/",
+  "theme_color": "#1e293b",
+  "description": "Professional GST &amp; Freelance Invoice Generator",
+  "id": "/index.html",
+  "lang": "en"
+}
