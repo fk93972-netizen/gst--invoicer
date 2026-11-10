@@ -3,12 +3,11 @@
 <head>
   <link rel="manifest" href='data:application/manifest+json,{"name":"GST Invoice Generator","short_name":"Invoicer","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#1e293b","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135706.png","sizes":"512x512","type":"image/png"}]}'>
   
-  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GST & Freelancer Invoice Generator</title>
+  <title>GST & Freelancer Invoice Generator Pro</title>
   
-  <!-- Google Fonts: Plus Jakarta Sans -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -31,15 +30,6 @@
         extend: {
           fontFamily: {
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-            }
           }
         }
       }
@@ -54,16 +44,8 @@
     }
     @media print {
       .no-print { display: none !important; }
-      body { background-color: #ffffff; padding: 0; }
+      body { background-color: #ffffff; padding: 0; margin: 0; }
       .invoice-container { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background-color: #cbd5e1;
-      border-radius: 4px;
     }
   </style>
 </head>
@@ -75,30 +57,35 @@
       
       <!-- Brand & Title -->
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xl shadow-md shadow-indigo-100">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-xl shadow-md">
           ₹
         </div>
         <div>
-          <h1 class="text-lg font-bold text-slate-900 leading-tight">GST Invoicer</h1>
-          <p class="text-xs text-slate-500 font-medium">India GST & Freelancer Tax Invoicing</p>
+          <h1 class="text-lg font-bold text-slate-900 leading-tight">GST Invoicer Pro</h1>
+          <p class="text-xs text-slate-500 font-medium">GST Billing & Accounts Manager</p>
         </div>
       </div>
 
       <!-- Quick Action Buttons -->
       <div class="flex flex-wrap items-center gap-2">
-        <button onclick="saveSellerProfile()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition shadow-sm" title="Save Business Profile to localStorage">
+        <button onclick="saveSellerProfile()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition shadow-sm">
           <i class="fa-solid fa-floppy-disk text-indigo-600"></i>
           <span>Save Profile</span>
         </button>
 
-        <button onclick="openModal('templateModal')" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition shadow-sm">
-          <i class="fa-solid fa-bookmark text-indigo-600"></i>
-          <span>Templates</span>
+        <button onclick="saveCurrentInvoiceToHistory()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition shadow-sm">
+          <i class="fa-solid fa-bookmark text-emerald-600"></i>
+          <span>Save Invoice</span>
         </button>
 
-        <button onclick="openModal('clientDirectoryModal')" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition shadow-sm">
-          <i class="fa-solid fa-users text-indigo-600"></i>
-          <span>Clients</span>
+        <button onclick="openHistoryModal()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition shadow-sm">
+          <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i>
+          <span>History (<span id="historyCount">0</span>)</span>
+        </button>
+
+        <button onclick="sendDueReminderWhatsApp()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition shadow-sm" title="Send Payment Reminder">
+          <i class="fa-solid fa-bell text-amber-600 text-sm"></i>
+          <span>Due Alert</span>
         </button>
 
         <button onclick="shareViaWhatsApp()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition shadow-sm">
@@ -106,14 +93,19 @@
           <span>WhatsApp</span>
         </button>
 
+        <button onclick="printDirectly()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-800 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition shadow-sm">
+          <i class="fa-solid fa-print text-slate-600"></i>
+          <span>Print</span>
+        </button>
+
         <button onclick="togglePreviewMode()" id="previewBtn" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-800 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition shadow-sm">
           <i class="fa-solid fa-eye text-slate-600"></i>
           <span id="previewBtnText">Preview</span>
         </button>
 
-        <button onclick="downloadPDF()" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition shadow-md shadow-indigo-100">
+        <button onclick="downloadPDF()" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition shadow-md">
           <i class="fa-solid fa-file-arrow-down"></i>
-          <span>Download PDF</span>
+          <span>PDF</span>
         </button>
       </div>
 
@@ -127,7 +119,7 @@
     <div class="mb-6 p-3 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-3 no-print">
       <div class="flex items-center gap-2">
         <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
-        <span class="text-xs font-bold text-slate-700">Choose Invoice Layout Style:</span>
+        <span class="text-xs font-bold text-slate-700">Layout Theme:</span>
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <button onclick="setLayoutStyle('modern')" class="style-pill px-3 py-1.5 rounded-lg text-xs font-bold transition border border-indigo-600 bg-indigo-600 text-white" data-style="modern">
@@ -145,11 +137,11 @@
       </div>
     </div>
 
-    <!-- THE INVOICE SHEET (WRAPPED FOR PRINT & PREVIEW) -->
+    <!-- THE INVOICE SHEET -->
     <div id="invoiceSheet" class="invoice-container bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-10 transition-all duration-200">
       
       <!-- INVOICE HEADER BAR -->
-      <div id="invoiceHeaderBanner" class="p-5 rounded-xl border border-slate-200 bg-indigo-50/50 mb-8 flex flex-wrap justify-between items-start gap-4">
+      <div id="invoiceHeaderBanner" class="p-5 rounded-xl border border-indigo-200 bg-indigo-50/50 mb-8 flex flex-wrap justify-between items-start gap-4">
         <div>
           <h2 id="dispBizName" class="text-2xl font-extrabold text-indigo-700 tracking-tight">Apex Digital Studios</h2>
           <p id="dispSellerGstin" class="text-xs font-semibold text-slate-700 mt-1">GSTIN: 27AABCA1234F1Z8 | PAN: AABCA1234F</p>
@@ -160,16 +152,21 @@
           <span class="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-black rounded-md tracking-wider">
             TAX INVOICE
           </span>
+          <div class="mt-2">
+            <span id="dispPaymentBadge" class="inline-block px-2.5 py-0.5 text-[10px] font-black rounded bg-emerald-100 text-emerald-800 uppercase tracking-wider">
+              PAID
+            </span>
+          </div>
           <p class="text-[11px] text-slate-500 font-semibold mt-1">Original for Recipient</p>
           <p class="text-[10px] text-slate-400">Rule 46 of CGST Rules, 2017</p>
         </div>
       </div>
 
-      <!-- EDITABLE FORMS (HIDDEN IN PRINT & PREVIEW) -->
+      <!-- EDITABLE CONTROLS (NO-PRINT) -->
       <div id="editorControls" class="space-y-6 no-print">
 
-        <!-- METADATA GRID (INVOICE NO, DATES, SUPPLY TYPE) -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+        <!-- METADATA & STATUS -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">Invoice Number *</label>
             <input type="text" id="invNumber" value="INV-2026-001" oninput="updateInvoice()" class="w-full px-3 py-2 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
@@ -189,30 +186,37 @@
               <option value="INTER_STATE">Inter-State (IGST)</option>
             </select>
           </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Payment Status</label>
+            <select id="paymentStatus" onchange="updateInvoice()" class="w-full px-3 py-2 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white text-emerald-700">
+              <option value="PAID">PAID</option>
+              <option value="UNPAID">UNPAID</option>
+              <option value="OVERDUE">OVERDUE</option>
+            </select>
+          </div>
         </div>
 
-        <!-- PARTIES: BILLED BY (SELLER) & BILLED TO (BUYER) -->
+        <!-- PARTIES: BILLED BY & BILLED TO -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           <!-- BILLED BY (SELLER) -->
           <div class="p-5 border border-slate-200 rounded-xl bg-white space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-slate-100">
               <h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
-                <i class="fa-solid fa-building-user"></i> Billed By (Supplier Details)
+                <i class="fa-solid fa-building-user"></i> Billed By (Supplier)
               </h3>
               <span class="text-[11px] text-slate-400 font-medium">Your Profile</span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="sm:col-span-2">
-                <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Business / Freelancer Name *</label>
+                <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Business Name *</label>
                 <input type="text" id="sellerName" value="Apex Digital Studios" oninput="updateInvoice()" class="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
               </div>
 
               <div>
                 <label class="block text-[11px] font-bold text-slate-600 mb-0.5">GSTIN (15 Chars)</label>
                 <input type="text" id="sellerGstin" value="27AABCA1234F1Z8" maxlength="15" oninput="handleSellerGstinChange()" class="w-full uppercase px-3 py-1.5 text-xs font-mono border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                <p id="sellerGstinFeedback" class="text-[10px] mt-0.5 font-medium"></p>
               </div>
 
               <div>
@@ -221,10 +225,8 @@
               </div>
 
               <div class="sm:col-span-2">
-                <label class="block text-[11px] font-bold text-slate-600 mb-0.5">State & Official GST Code</label>
-                <select id="sellerState" onchange="handleSellerStateChange()" class="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
-                  <!-- Generated by JS -->
-                </select>
+                <label class="block text-[11px] font-bold text-slate-600 mb-0.5">State & GST Code</label>
+                <select id="sellerState" onchange="autoDetectSupplyType(); updateInvoice();" class="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"></select>
               </div>
 
               <div class="sm:col-span-2">
@@ -248,13 +250,8 @@
           <div class="p-5 border border-slate-200 rounded-xl bg-white space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-slate-100">
               <h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
-                <i class="fa-solid fa-user-check"></i> Billed To (Client Details)
+                <i class="fa-solid fa-user-check"></i> Billed To (Client)
               </h3>
-              <div class="flex items-center gap-2">
-                <button onclick="openModal('clientSelectModal')" class="text-xs text-indigo-600 font-bold hover:underline">
-                  <i class="fa-solid fa-address-book"></i> Choose Client
-                </button>
-              </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -274,21 +271,13 @@
               </div>
 
               <div class="sm:col-span-2">
-                <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Place of Supply (Client State)</label>
-                <select id="clientState" onchange="handleClientStateChange()" class="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
-                  <!-- Generated by JS -->
-                </select>
+                <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Place of Supply (State)</label>
+                <select id="clientState" onchange="autoDetectSupplyType(); updateInvoice();" class="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"></select>
               </div>
 
               <div class="sm:col-span-2">
                 <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Client Billing Address</label>
                 <input type="text" id="clientAddress" value="Plot 12, Cyber Gateway, BKC, Mumbai" oninput="updateInvoice()" class="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-              </div>
-
-              <div class="sm:col-span-2 flex justify-end">
-                <button onclick="saveCurrentClientToDirectory()" class="text-xs text-indigo-600 font-semibold hover:text-indigo-800">
-                  <i class="fa-solid fa-user-plus mr-1"></i> Save to Address Book
-                </button>
               </div>
             </div>
           </div>
@@ -297,7 +286,7 @@
 
       </div>
 
-      <!-- INVOICE METADATA STRIP (VISIBLE IN PRINT & PREVIEW) -->
+      <!-- INVOICE METADATA STRIP (PRINT & PREVIEW) -->
       <div id="printMetadataStrip" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 border border-slate-200 rounded-xl bg-slate-50 mb-6 text-xs">
         <div>
           <span class="text-slate-400 font-medium block">Invoice No:</span>
@@ -317,7 +306,7 @@
         </div>
       </div>
 
-      <!-- PARTIES SUMMARY BOX (VISIBLE IN PRINT & PREVIEW) -->
+      <!-- PARTIES SUMMARY BOX (PRINT & PREVIEW) -->
       <div id="printPartiesBox" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border border-slate-200 rounded-xl bg-slate-50 mb-6 text-xs">
         <div>
           <p class="font-bold text-indigo-700 uppercase tracking-wider mb-1">BILLED TO (BUYER):</p>
@@ -329,30 +318,7 @@
         <div class="text-left md:text-right">
           <p class="font-bold text-indigo-700 uppercase tracking-wider mb-1">PLACE OF SUPPLY:</p>
           <p id="printPlaceOfSupply" class="font-bold text-slate-800"></p>
-          <p class="text-slate-500 mt-1">Reverse Charge Applicable: <span class="font-bold text-slate-700">No</span></p>
-        </div>
-      </div>
-
-      <!-- FREELANCER PRESETS BAR (NO-PRINT) -->
-      <div class="mt-6 mb-3 no-print">
-        <div class="flex items-center gap-2 mb-2">
-          <i class="fa-solid fa-bolt text-amber-500 text-xs"></i>
-          <span class="text-xs font-bold text-slate-700">Quick Line Item Presets for Freelancers:</span>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button onclick="addPresetItem('Web Dev', 'Full-Stack Web Application Development & Deployment', '998314', 60000)" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-md border border-slate-200 transition">
-            + Web Development
-          </button>
-          <button onclick="addPresetItem('UI/UX', 'Mobile App UI/UX Wireframing & Design System', '998313', 35000)" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-md border border-slate-200 transition">
-            + UI/UX Design
-          </button>
-          <button onclick="addPresetItem('Cloud', 'Cloud Infrastructure, CI/CD & Database Setup', '998315', 3000
-                      <button onclick="addPresetItem('UI/UX', 'Mobile App UI/UX Wireframing & Design', '998313', 25000)" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-md border border-slate-200 transition">
-            + UI/UX Design
-          </button>
-          <button onclick="addPresetItem('Consulting', 'Technical Consulting & System Architecture', '998311', 15000)" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-md border border-slate-200 transition">
-            + Tech Consulting
-          </button>
+          <p class="text-slate-500 mt-1">Status: <span id="printPaymentStatus" class="font-bold text-emerald-600">PAID</span></p>
         </div>
       </div>
 
@@ -370,39 +336,63 @@
               <th class="p-3 w-12 text-center no-print"></th>
             </tr>
           </thead>
-          <tbody id="lineItemsTableBody" class="divide-y divide-slate-100">
-            <!-- Dynamic rows by JS -->
-          </tbody>
+          <tbody id="lineItemsTableBody" class="divide-y divide-slate-100"></tbody>
         </table>
       </div>
 
       <div class="flex justify-between items-center mb-6 no-print">
         <button onclick="addNewLineItem()" class="px-3 py-1.5 text-xs font-bold text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition">
-          <i class="fa-solid fa-plus mr-1"></i> Add Another Item
+          <i class="fa-solid fa-plus mr-1"></i> Add Item
         </button>
       </div>
 
-      <!-- TOTALS & PAYMENT SECTION -->
+      <!-- TOTALS, DISCOUNT, CESS & PAYMENT SECTION -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-200">
         
-        <!-- UPI QR Code & Banking Details -->
+        <!-- Left: UPI QR & Banking Details -->
         <div class="space-y-4">
           <div class="flex items-start gap-4 p-4 border border-slate-200 rounded-xl bg-slate-50">
             <div id="qrcode" class="p-2 bg-white rounded-lg border border-slate-200 shadow-sm shrink-0"></div>
             <div>
               <p class="text-xs font-bold text-slate-800">Scan & Pay via UPI</p>
               <p id="dispUpiId" class="text-xs font-mono font-semibold text-indigo-600 mt-0.5">apexdigital@okaxis</p>
-              <p class="text-[11px] text-slate-500 mt-2">Instant payment via GPay, PhonePe, Paytm, or BHIM.</p>
+              <p class="text-[11px] text-slate-500 mt-1">Instant payment via PhonePe, GPay, Paytm.</p>
+            </div>
+          </div>
+
+          <!-- Bank Details Box -->
+          <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 text-xs space-y-1.5">
+            <p class="font-bold text-slate-700 flex items-center justify-between">
+              <span><i class="fa-solid fa-building-columns mr-1 text-indigo-600"></i> Bank Transfer Details</span>
+              <button onclick="saveBankDetails()" class="text-[10px] text-indigo-600 hover:underline no-print">Save Default</button>
+            </p>
+            <div class="grid grid-cols-2 gap-2 mt-2">
+              <input type="text" id="bankName" placeholder="Bank Name" value="HDFC Bank" class="px-2 py-1 text-xs border border-slate-200 rounded bg-white">
+              <input type="text" id="bankAccount" placeholder="Account Number" value="50200012345678" class="px-2 py-1 text-xs font-mono border border-slate-200 rounded bg-white">
+              <input type="text" id="bankIfsc" placeholder="IFSC Code" value="HDFC0000123" class="px-2 py-1 text-xs uppercase font-mono border border-slate-200 rounded bg-white">
+              <input type="text" id="bankBranch" placeholder="Branch Name" value="Andheri East, Mumbai" class="px-2 py-1 text-xs border border-slate-200 rounded bg-white">
             </div>
           </div>
         </div>
 
-        <!-- Calculations Summary -->
+        <!-- Right: Calculations Summary with Discount & Cess -->
         <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 text-xs space-y-2">
           <div class="flex justify-between text-slate-600">
-            <span>Taxable Value:</span>
+            <span>Subtotal:</span>
+            <span id="subTotalAmount" class="font-semibold text-slate-800">₹0.00</span>
+          </div>
+
+          <!-- Discount Input -->
+          <div class="flex items-center justify-between text-slate-600 gap-2">
+            <span class="flex items-center gap-1">Discount (₹):</span>
+            <input type="number" id="discountInput" value="0" min="0" oninput="updateInvoice()" class="w-24 px-2 py-0.5 text-right font-semibold border border-slate-200 rounded bg-white">
+          </div>
+
+          <div class="flex justify-between text-slate-600 border-t border-slate-200 pt-1">
+            <span>Taxable Amount:</span>
             <span id="taxableAmount" class="font-semibold text-slate-800">₹0.00</span>
           </div>
+
           <div id="cgstRow" class="flex justify-between text-slate-600">
             <span>Central Tax (CGST):</span>
             <span id="cgstAmount" class="font-semibold text-slate-800">₹0.00</span>
@@ -415,10 +405,50 @@
             <span>Integrated Tax (IGST):</span>
             <span id="igstAmount" class="font-semibold text-slate-800">₹0.00</span>
           </div>
-          <div class="flex justify-between text-sm font-extrabold text-slate-900 border-t border-slate-200 pt-2 mt-2">
-            <span>Total Payable:</span>
+
+          <!-- Cess Option -->
+          <div class="flex items-center justify-between text-slate-600 gap-2">
+            <span>GST Cess (%):</span>
+            <input type="number" id="cessRateInput" value="0" min="0" oninput="updateInvoice()" class="w-20 px-2 py-0.5 text-right font-semibold border border-slate-200 rounded bg-white">
+          </div>
+          <div id="cessRow" class="hidden flex justify-between text-slate-600">
+            <span>Cess Amount:</span>
+            <span id="cessAmount" class="font-semibold text-slate-800">₹0.00</span>
+          </div>
+
+          <div class="flex justify-between text-base font-extrabold text-slate-900 border-t-2 border-slate-300 pt-2 mt-2">
+            <span>Grand Total:</span>
             <span id="grandTotal" class="text-indigo-700">₹0.00</span>
           </div>
+        </div>
+
+      </div>
+
+      <!-- TERMS & CONDITIONS AND SIGNATURE FOOTER -->
+      <div class="mt-8 pt-6 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+        
+        <!-- Terms -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-slate-700">Terms & Conditions:</span>
+            <button onclick="saveTerms()" class="text-[10px] text-indigo-600 hover:underline no-print">Save Terms</button>
+          </div>
+          <textarea id="termsInput" rows="3" class="w-full p-2 border border-slate-200 rounded-lg text-slate-600 bg-slate-50 focus:bg-white text-[11px] leading-relaxed">1. Payment is due within 14 days of invoice date.
+2. Please quote invoice number when transferring funds.
+3. Interest @18% p.a. applicable for delayed payments.</textarea>
+        </div>
+
+        <!-- Signature / Seal Upload -->
+        <div class="text-left md:text-right flex flex-col justify-between items-start md:items-end">
+          <div class="w-48 h-20 border border-dashed border-slate-300 rounded-lg flex items-center justify-center relative overflow-hidden bg-slate-50">
+            <img id="signaturePreview" class="hidden max-h-full max-w-full object-contain" alt="Signature">
+            <div id="signaturePlaceholder" class="text-center p-2">
+              <i class="fa-solid fa-signature text-slate-400 text-sm"></i>
+              <p class="text-[10px] text-slate-400 mt-1">Upload Seal / Signature</p>
+            </div>
+            <input type="file" id="signatureFile" accept="image/*" onchange="handleSignatureUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer no-print">
+          </div>
+          <p class="font-bold text-slate-800 mt-2">Authorised Signatory</p>
         </div>
 
       </div>
@@ -426,28 +456,43 @@
     </div>
   </main>
 
-  <!-- MODALS -->
-  <div id="templateModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 no-print">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-200">
-      <h3 class="text-sm font-bold text-slate-900 mb-2">Invoice Style Templates</h3>
-      <p class="text-xs text-slate-500 mb-4">Select a layout from the style switcher on top: Modern Indigo, Corporate Formal, Executive Emerald, or Vibrant Violet.</p>
-      <button onclick="closeModal('templateModal')" class="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold">Understood</button>
+  <!-- SAVED INVOICE HISTORY MODAL (WITH STATUS FILTER) -->
+  <div id="historyModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl border border-slate-200 max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Invoice History & Status Tracker</h3>
+          <p class="text-[11px] text-slate-400">Manage all your created invoices locally</p>
+        </div>
+        <button onclick="closeModal('historyModal')" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="flex gap-2 my-3 text-xs">
+        <button onclick="filterHistory('ALL')" class="history-filter-btn px-2.5 py-1 rounded-md font-bold bg-indigo-600 text-white" data-filter="ALL">All</button>
+        <button onclick="filterHistory('PAID')" class="history-filter-btn px-2.5 py-1 rounded-md font-bold bg-slate-100 text-slate-600" data-filter="PAID">Paid</button>
+        <button onclick="filterHistory('UNPAID')" class="history-filter-btn px-2.5 py-1 rounded-md font-bold bg-slate-100 text-slate-600" data-filter="UNPAID">Unpaid</button>
+        <button onclick="filterHistory('OVERDUE')" class="history-filter-btn px-2.5 py-1 rounded-md font-bold bg-slate-100 text-slate-600" data-filter="OVERDUE">Overdue</button>
+      </div>
+
+      <div id="historyListContainer" class="flex-1 overflow-y-auto divide-y divide-slate-100 my-2 text-xs">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 flex justify-between items-center">
+        <button onclick="clearAllHistory()" class="text-xs text-rose-600 font-semibold hover:underline">
+          Clear History
+        </button>
+        <button onclick="closeModal('historyModal')" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-200">
+          Close
+        </button>
+      </div>
     </div>
   </div>
 
-  <div id="clientDirectoryModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 no-print">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
-      <div class="flex justify-between items-center mb-3">
-        <h3 class="text-sm font-bold text-slate-900">Saved Clients</h3>
-        <button onclick="closeModal('clientDirectoryModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div id="savedClientsList" class="space-y-2 max-h-60 overflow-y-auto text-xs text-slate-600">
-        <!-- JS rendered client items -->
-      </div>
-    </div>
-  </div>
-
-  <!-- COMPLETE FUNCTIONAL LOGIC -->
+  <!-- COMPLETE JAVASCRIPT LOGIC -->
   <script>
     const gstStates = [
       { code: "27", name: "Maharashtra" }, { code: "07", name: "Delhi" },
@@ -458,17 +503,22 @@
     ];
 
     let items = [
-      { desc: "Full-Stack Web Application Development & Deployment", hsn: "998314", qty: 1, rate: 60000, gst: 18 }
+      { desc: "Full-Stack Web Development & Consulting", hsn: "998314", qty: 1, rate: 25000, gst: 18 }
     ];
 
     let isPreview = false;
+    let currentFilter = 'ALL';
 
     document.addEventListener("DOMContentLoaded", () => {
       populateStates();
       loadSavedProfile();
+      loadSavedBank();
+      loadSavedTerms();
+      loadSavedSignature();
       renderItems();
       renderQRCode();
-      
+      updateHistoryCount();
+
       const today = new Date();
       const due = new Date();
       due.setDate(today.getDate() + 14);
@@ -499,10 +549,10 @@
         <tr>
           <td class="p-3"><input type="text" value="${it.desc}" oninput="items[${idx}].desc=this.value" class="w-full bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none"></td>
           <td class="p-3"><input type="text" value="${it.hsn}" oninput="items[${idx}].hsn=this.value" class="w-full bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none"></td>
-          <td class="p-3 text-center"><input type="number" min="1" value="${it.qty}" oninput="items[${idx}].qty=parseFloat(this.value)||0; updateInvoice();" class="w-14 text-center bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none"></td>
-          <td class="p-3 text-right"><input type="number" min="0" value="${it.rate}" oninput="items[${idx}].rate=parseFloat(this.value)||0; updateInvoice();" class="w-24 text-right bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none"></td>
+          <td class="p-3 text-center"><input type="number" min="1" value="${it.qty}" oninput="items[${idx}].qty=parseFloat(this.value)||0; updateInvoice();" class="w-14 text-center bg-transparent border-b border-slate-200"></td>
+          <td class="p-3 text-right"><input type="number" min="0" value="${it.rate}" oninput="items[${idx}].rate=parseFloat(this.value)||0; updateInvoice();" class="w-24 text-right bg-transparent border-b border-slate-200"></td>
           <td class="p-3 text-center">
-            <select onchange="items[${idx}].gst=parseFloat(this.value); updateInvoice();" class="bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none">
+            <select onchange="items[${idx}].gst=parseFloat(this.value); updateInvoice();" class="bg-transparent border-b border-slate-200">
               <option value="0" ${it.gst===0?'selected':''}>0%</option>
               <option value="5" ${it.gst===5?'selected':''}>5%</option>
               <option value="12" ${it.gst===12?'selected':''}>12%</option>
@@ -532,51 +582,79 @@
       }
     }
 
-    function addPresetItem(tag, desc, hsn, rate) {
-      items.push({ desc, hsn, qty: 1, rate, gst: 18 });
-      renderItems();
-      updateInvoice();
-    }
-
     function updateInvoice() {
-      let taxable = 0, taxTotal = 0;
+      let subTotal = 0;
+      let totalGst = 0;
+
       items.forEach(it => {
         const lineVal = (it.qty || 0) * (it.rate || 0);
-        taxable += lineVal;
-        taxTotal += (lineVal * (it.gst || 0)) / 100;
+        subTotal += lineVal;
+        totalGst += (lineVal * (it.gst || 0)) / 100;
       });
+
+      const discount = parseFloat(document.getElementById("discountInput").value) || 0;
+      const taxable = Math.max(0, subTotal - discount);
+
+      // Adjust tax proportion if discount is applied
+      const taxRatio = subTotal > 0 ? (taxable / subTotal) : 1;
+      const finalTax = totalGst * taxRatio;
+
+      const cessRate = parseFloat(document.getElementById("cessRateInput").value) || 0;
+      const cessAmount = (taxable * cessRate) / 100;
+
+      const grandTotal = taxable + finalTax + cessAmount;
 
       const supplyType = document.getElementById("supplyType").value;
       const cgstRow = document.getElementById("cgstRow");
       const sgstRow = document.getElementById("sgstRow");
       const igstRow = document.getElementById("igstRow");
+      const cessRow = document.getElementById("cessRow");
 
       if (supplyType === "INTER_STATE") {
         cgstRow.classList.add("hidden");
         sgstRow.classList.add("hidden");
         igstRow.classList.remove("hidden");
-        document.getElementById("igstAmount").innerText = `₹${taxTotal.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        document.getElementById("igstAmount").innerText = `₹${finalTax.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
       } else {
         cgstRow.classList.remove("hidden");
         sgstRow.classList.remove("hidden");
         igstRow.classList.add("hidden");
-        const half = taxTotal / 2;
+        const half = finalTax / 2;
         document.getElementById("cgstAmount").innerText = `₹${half.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
         document.getElementById("sgstAmount").innerText = `₹${half.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
       }
 
-      const total = taxable + taxTotal;
-      document.getElementById("taxableAmount").innerText = `₹${taxable.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
-      document.getElementById("grandTotal").innerText = `₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+      if (cessRate > 0) {
+        cessRow.classList.remove("hidden");
+        document.getElementById("cessAmount").innerText = `₹${cessAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+      } else {
+        cessRow.classList.add("hidden");
+      }
 
-      // Update banners
+      document.getElementById("subTotalAmount").innerText = `₹${subTotal.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+      document.getElementById("taxableAmount").innerText = `₹${taxable.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+      document.getElementById("grandTotal").innerText = `₹${grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+
+      // Update status badges
+      const status = document.getElementById("paymentStatus").value;
+      const badge = document.getElementById("dispPaymentBadge");
+      badge.innerText = status;
+      if (status === 'PAID') {
+        badge.className = "inline-block px-2.5 py-0.5 text-[10px] font-black rounded bg-emerald-100 text-emerald-800 uppercase tracking-wider";
+      } else if (status === 'UNPAID') {
+        badge.className = "inline-block px-2.5 py-0.5 text-[10px] font-black rounded bg-amber-100 text-amber-800 uppercase tracking-wider";
+      } else {
+        badge.className = "inline-block px-2.5 py-0.5 text-[10px] font-black rounded bg-rose-100 text-rose-800 uppercase tracking-wider";
+      }
+
+      // Sync headers
       document.getElementById("dispBizName").innerText = document.getElementById("sellerName").value || "Apex Digital Studios";
       document.getElementById("dispSellerGstin").innerText = `GSTIN: ${document.getElementById("sellerGstin").value} | PAN: ${document.getElementById("sellerPan").value}`;
       document.getElementById("dispSellerAddress").innerText = document.getElementById("sellerAddress").value;
       document.getElementById("dispSellerContact").innerText = `${document.getElementById("sellerPhone").value} | ${document.getElementById("sellerUpi").value}`;
       document.getElementById("dispUpiId").innerText = document.getElementById("sellerUpi").value;
 
-      renderQRCode(total);
+      renderQRCode(grandTotal);
     }
 
     function renderQRCode(amt) {
@@ -590,25 +668,10 @@
       new QRCode(qrContainer, { text: upiUrl, width: 88, height: 88 });
     }
 
-    function handleSellerStateChange() {
-      autoDetectSupplyType();
-      updateInvoice();
-    }
-
-    function handleClientStateChange() {
-      autoDetectSupplyType();
-      updateInvoice();
-    }
-
     function autoDetectSupplyType() {
       const sState = document.getElementById("sellerState").value;
       const cState = document.getElementById("clientState").value;
-      const typeElem = document.getElementById("supplyType");
-      if (sState === cState) {
-        typeElem.value = "INTRA_STATE";
-      } else {
-        typeElem.value = "INTER_STATE";
-      }
+      document.getElementById("supplyType").value = (sState === cState) ? "INTRA_STATE" : "INTER_STATE";
     }
 
     function handleSellerGstinChange() {
@@ -669,32 +732,81 @@
       } catch(e) {}
     }
 
+    function saveBankDetails() {
+      const bank = {
+        name: document.getElementById("bankName").value,
+        account: document.getElementById("bankAccount").value,
+        ifsc: document.getElementById("bankIfsc").value,
+        branch: document.getElementById("bankBranch").value
+      };
+      localStorage.setItem("gst_bank_details", JSON.stringify(bank));
+      alert("Default bank details saved!");
+    }
+
+    function loadSavedBank() {
+      const raw = localStorage.getItem("gst_bank_details");
+      if(!raw) return;
+      try {
+        const b = JSON.parse(raw);
+        if(b.name) document.getElementById("bankName").value = b.name;
+        if(b.account) document.getElementById("bankAccount").value = b.account;
+        if(b.ifsc) document.getElementById("bankIfsc").value = b.ifsc;
+        if(b.branch) document.getElementById("bankBranch").value = b.branch;
+      } catch(e) {}
+    }
+
+    function saveTerms() {
+      localStorage.setItem("gst_invoice_terms", document.getElementById("termsInput").value);
+      alert("Terms & conditions saved!");
+    }
+
+    function loadSavedTerms() {
+      const raw = localStorage.getItem("gst_invoice_terms");
+      if(raw) document.getElementById("termsInput").value = raw;
+    }
+
+    function handleSignatureUpload(event) {
+      const file = event.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        localStorage.setItem("gst_signature_data", dataUrl);
+        displaySignature(dataUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function displaySignature(dataUrl) {
+      const img = document.getElementById("signaturePreview");
+      const placeholder = document.getElementById("signaturePlaceholder");
+      img.src = dataUrl;
+      img.classList.remove("hidden");
+      placeholder.classList.add("hidden");
+    }
+
+    function loadSavedSignature() {
+      const data = localStorage.getItem("gst_signature_data");
+      if(data) displaySignature(data);
+    }
+
     function setLayoutStyle(style) {
       const banner = document.getElementById("invoiceHeaderBanner");
       banner.className = "p-5 rounded-xl border mb-8 flex flex-wrap justify-between items-start gap-4";
-      
       document.querySelectorAll(".style-pill").forEach(p => {
         p.className = "style-pill px-3 py-1.5 rounded-lg text-xs font-bold transition border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100";
       });
-
       const activeBtn = document.querySelector(`[data-style="${style}"]`);
-      if(activeBtn) {
-        activeBtn.className = "style-pill px-3 py-1.5 rounded-lg text-xs font-bold transition border border-indigo-600 bg-indigo-600 text-white";
-      }
+      if(activeBtn) activeBtn.className = "style-pill px-3 py-1.5 rounded-lg text-xs font-bold transition border border-indigo-600 bg-indigo-600 text-white";
 
-      if(style === 'modern') {
-        banner.classList.add("bg-indigo-50/60", "border-indigo-200");
-      } else if(style === 'corporate') {
-        banner.classList.add("bg-slate-100", "border-slate-300");
-      } else if(style === 'executive') {
-        banner.classList.add("bg-emerald-50", "border-emerald-200");
-      } else if(style === 'vibrant') {
-        banner.classList.add("bg-purple-50", "border-purple-200");
-      }
+      if(style === 'modern') banner.classList.add("bg-indigo-50/60", "border-indigo-200");
+      else if(style === 'corporate') banner.classList.add("bg-slate-100", "border-slate-300");
+      else if(style === 'executive') banner.classList.add("bg-emerald-50", "border-emerald-200");
+      else if(style === 'vibrant') banner.classList.add("bg-purple-50", "border-purple-200");
     }
 
-    function togglePreviewMode() {
-      isPreview = !isPreview;
+    function togglePreviewMode(forceState) {
+      isPreview = (typeof forceState === 'boolean') ? forceState : !isPreview;
       const editor = document.getElementById("editorControls");
       const printStrip = document.getElementById("printMetadataStrip");
       const printParties = document.getElementById("printPartiesBox");
@@ -713,7 +825,8 @@
         document.getElementById("printClientName").innerText = document.getElementById("clientName").value;
         document.getElementById("printClientAddress").innerText = document.getElementById("clientAddress").value;
         document.getElementById("printClientGstin").innerText = `GSTIN: ${document.getElementById("clientGstin").value || 'Unregistered'}`;
-        
+        document.getElementById("printPaymentStatus").innerText = document.getElementById("paymentStatus").value;
+
         const stateSelect = document.getElementById("clientState");
         document.getElementById("printClientState").innerText = stateSelect.options[stateSelect.selectedIndex].text;
         document.getElementById("printPlaceOfSupply").innerText = stateSelect.options[stateSelect.selectedIndex].text;
@@ -727,16 +840,37 @@
       }
     }
 
+    function printDirectly() {
+      togglePreviewMode(true);
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          togglePreviewMode(false);
+        }, 800);
+      }, 300);
+    }
+
     function shareViaWhatsApp() {
       const inv = document.getElementById("invNumber").value;
       const client = document.getElementById("clientName").value;
       const total = document.getElementById("grandTotal").innerText;
-      const msg = encodeURIComponent(`Hi ${client}, please find your Tax Invoice (${inv}) of ${total}. Let me know if you have any questions.`);
+      const msg = encodeURIComponent(`Hi ${client}, please find your Tax Invoice (${inv}) of ${total}. Status: ${document.getElementById("paymentStatus").value}.`);
+      window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+    }
+
+    // DUE DATE REMINDER VIA WHATSAPP
+    function sendDueReminderWhatsApp() {
+      const inv = document.getElementById("invNumber").value;
+      const client = document.getElementById("clientName").value;
+      const total = document.getElementById("grandTotal").innerText;
+      const due = document.getElementById("dueDate").value;
+      const upi = document.getElementById("sellerUpi").value;
+      const msg = encodeURIComponent(`Payment Reminder: Hi ${client}, invoice ${inv} of ${total} is due on ${due}. Please complete the payment via UPI to ${upi}. Thank you!`);
       window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
     }
 
     function downloadPDF() {
-      if(!isPreview) togglePreviewMode();
+      togglePreviewMode(true);
       setTimeout(() => {
         const sheet = document.getElementById("invoiceSheet");
         const opt = {
@@ -747,40 +881,154 @@
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().set(opt).from(sheet).save().then(() => {
-          if(isPreview) togglePreviewMode();
+          togglePreviewMode(false);
         });
       }, 300);
     }
 
-    function openModal(id) {
-      const el = document.getElementById(id);
-      if(el) el.classList.remove("hidden");
+    // SAVED INVOICE & STATUS TRACKER
+    function saveCurrentInvoiceToHistory() {
+      const invNum = document.getElementById("invNumber").value.trim();
+      if(!invNum) return alert("Please enter an Invoice Number.");
+
+      const invoiceData = {
+        id: 'INV_' + Date.now(),
+        invNumber: invNum,
+        invDate: document.getElementById("invDate").value,
+        dueDate: document.getElementById("dueDate").value,
+        supplyType: document.getElementById("supplyType").value,
+        status: document.getElementById("paymentStatus").value,
+        clientName: document.getElementById("clientName").value,
+        clientGstin: document.getElementById("clientGstin").value,
+        clientPhone: document.getElementById("clientPhone").value,
+        clientAddress: document.getElementById("clientAddress").value,
+        clientState: document.getElementById("clientState").value,
+        items: JSON.parse(JSON.stringify(items)),
+        discount: document.getElementById("discountInput").value,
+        cess: document.getElementById("cessRateInput").value,
+        total: document.getElementById("grandTotal").innerText,
+        savedAt: new Date().toLocaleDateString('en-IN')
+      };
+
+      let history = JSON.parse(localStorage.getItem("gst_invoice_history") || "[]");
+      const existingIndex = history.findIndex(h => h.invNumber === invNum);
+      if(existingIndex > -1) {
+        history[existingIndex] = invoiceData;
+      } else {
+        history.unshift(invoiceData);
+      }
+
+      localStorage.setItem("gst_invoice_history", JSON.stringify(history));
+      updateHistoryCount();
+      alert(`Invoice ${invNum} saved with status [${invoiceData.status}]!`);
+    }
+
+    function updateHistoryCount() {
+      const history = JSON.parse(localStorage.getItem("gst_invoice_history") || "[]");
+      const badge = document.getElementById("historyCount");
+      if(badge) badge.innerText = history.length;
+    }
+
+    function filterHistory(status) {
+      currentFilter = status;
+      document.querySelectorAll(".history-filter-btn").forEach(btn => {
+        if(btn.dataset.filter === status) {
+          btn.className = "history-filter-btn px-2.5 py-1 rounded-md font-bold bg-indigo-600 text-white";
+        } else {
+          btn.className = "history-filter-btn px-2.5 py-1 rounded-md font-bold bg-slate-100 text-slate-600";
+        }
+      });
+      openHistoryModal();
+    }
+
+    function openHistoryModal() {
+      let history = JSON.parse(localStorage.getItem("gst_invoice_history") || "[]");
+      if(currentFilter !== 'ALL') {
+        history = history.filter(h => h.status === currentFilter);
+      }
+
+      const container = document.getElementById("historyListContainer");
+      
+      if(history.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-slate-400">No invoices found for this filter.</div>`;
+      } else {
+        container.innerHTML = history.map((inv) => {
+          let badgeColor = "bg-emerald-100 text-emerald-800";
+          if(inv.status === 'UNPAID') badgeColor = "bg-amber-100 text-amber-800";
+          if(inv.status === 'OVERDUE') badgeColor = "bg-rose-100 text-rose-800";
+
+          return `
+            <div class="py-3 flex items-center justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-slate-800 text-xs">${inv.invNumber}</span>
+                  <span class="px-2 py-0.5 text-[9px] font-black rounded ${badgeColor}">${inv.status || 'PAID'}</span>
+                  <span class="text-[10px] text-slate-400">Due: ${inv.dueDate}</span>
+                </div>
+                <p class="text-[11px] text-slate-600 mt-0.5">${inv.clientName}</p>
+                <p class="text-xs font-extrabold text-indigo-600 mt-0.5">${inv.total}</p>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="loadInvoiceFromHistory('${inv.id}')" class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded text-xs font-semibold hover:bg-indigo-100">
+                  Load
+                </button>
+                <button onclick="deleteInvoiceFromHistory('${inv.id}')" class="px-2 py-1 text-rose-500 hover:text-rose-700">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      document.getElementById("historyModal").classList.remove("hidden");
+    }
+
+    function loadInvoiceFromHistory(id) {
+      const history = JSON.parse(localStorage.getItem("gst_invoice_history") || "[]");
+      const inv = history.find(h => h.id === id);
+      if(!inv) return;
+
+      document.getElementById("invNumber").value = inv.invNumber;
+      document.getElementById("invDate").value = inv.invDate;
+      document.getElementById("dueDate").value = inv.dueDate;
+      document.getElementById("supplyType").value = inv.supplyType;
+      document.getElementById("paymentStatus").value = inv.status || 'PAID';
+      document.getElementById("clientName").value = inv.clientName;
+      document.getElementById("clientGstin").value = inv.clientGstin;
+      document.getElementById("clientPhone").value = inv.clientPhone;
+      document.getElementById("clientAddress").value = inv.clientAddress;
+      document.getElementById("clientState").value = inv.clientState;
+      document.getElementById("discountInput").value = inv.discount || 0;
+      document.getElementById("cessRateInput").value = inv.cess || 0;
+
+      items = inv.items || [];
+      renderItems();
+      updateInvoice();
+      closeModal('historyModal');
+      alert(`Invoice ${inv.invNumber} loaded into editor!`);
+    }
+
+    function deleteInvoiceFromHistory(id) {
+      if(!confirm("Are you sure you want to delete this invoice?")) return;
+      let history = JSON.parse(localStorage.getItem("gst_invoice_history") || "[]");
+      history = history.filter(h => h.id !== id);
+      localStorage.setItem("gst_invoice_history", JSON.stringify(history));
+      updateHistoryCount();
+      openHistoryModal();
+    }
+
+    function clearAllHistory() {
+      if(!confirm("Are you sure you want to clear all invoice history?")) return;
+      localStorage.removeItem("gst_invoice_history");
+      updateHistoryCount();
+      openHistoryModal();
     }
 
     function closeModal(id) {
       const el = document.getElementById(id);
       if(el) el.classList.add("hidden");
     }
-
-        function saveCurrentClientToDirectory() {
-      const name = document.getElementById("clientName").value;
-      const gstin = document.getElementById("clientGstin").value;
-      if(!name) return alert("Please enter client name");
-      
-      let directory = JSON.parse(localStorage.getItem("gst_clients") || "[]");
-      directory.push({ 
-        name, 
-        gstin, 
-        phone: document.getElementById("clientPhone").value, 
-        address: document.getElementById("clientAddress").value 
-      });
-      localStorage.setItem("gst_clients", JSON.stringify(directory));
-      alert(`Client "${name}" added to Address Book.`);
-    }
   </script>
 </body>
 </html>
-
-  
-
-                             
