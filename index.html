@@ -347,3 +347,440 @@
             + UI/UX Design
           </button>
           <button onclick="addPresetItem('Cloud', 'Cloud Infrastructure, CI/CD & Database Setup', '998315', 3000
+                      <button onclick="addPresetItem('UI/UX', 'Mobile App UI/UX Wireframing & Design', '998313', 25000)" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-md border border-slate-200 transition">
+            + UI/UX Design
+          </button>
+          <button onclick="addPresetItem('Consulting', 'Technical Consulting & System Architecture', '998311', 15000)" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-md border border-slate-200 transition">
+            + Tech Consulting
+          </button>
+        </div>
+      </div>
+
+      <!-- LINE ITEMS TABLE -->
+      <div class="overflow-x-auto my-6 border border-slate-200 rounded-xl">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-100/75 border-b border-slate-200 text-slate-700 font-bold">
+              <th class="p-3">Item Description</th>
+              <th class="p-3 w-28">HSN/SAC</th>
+              <th class="p-3 w-20 text-center">Qty</th>
+              <th class="p-3 w-28 text-right">Rate (₹)</th>
+              <th class="p-3 w-24 text-center">GST %</th>
+              <th class="p-3 w-28 text-right">Amount (₹)</th>
+              <th class="p-3 w-12 text-center no-print"></th>
+            </tr>
+          </thead>
+          <tbody id="lineItemsTableBody" class="divide-y divide-slate-100">
+            <!-- Dynamic rows by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex justify-between items-center mb-6 no-print">
+        <button onclick="addNewLineItem()" class="px-3 py-1.5 text-xs font-bold text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition">
+          <i class="fa-solid fa-plus mr-1"></i> Add Another Item
+        </button>
+      </div>
+
+      <!-- TOTALS & PAYMENT SECTION -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-200">
+        
+        <!-- UPI QR Code & Banking Details -->
+        <div class="space-y-4">
+          <div class="flex items-start gap-4 p-4 border border-slate-200 rounded-xl bg-slate-50">
+            <div id="qrcode" class="p-2 bg-white rounded-lg border border-slate-200 shadow-sm shrink-0"></div>
+            <div>
+              <p class="text-xs font-bold text-slate-800">Scan & Pay via UPI</p>
+              <p id="dispUpiId" class="text-xs font-mono font-semibold text-indigo-600 mt-0.5">apexdigital@okaxis</p>
+              <p class="text-[11px] text-slate-500 mt-2">Instant payment via GPay, PhonePe, Paytm, or BHIM.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculations Summary -->
+        <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 text-xs space-y-2">
+          <div class="flex justify-between text-slate-600">
+            <span>Taxable Value:</span>
+            <span id="taxableAmount" class="font-semibold text-slate-800">₹0.00</span>
+          </div>
+          <div id="cgstRow" class="flex justify-between text-slate-600">
+            <span>Central Tax (CGST):</span>
+            <span id="cgstAmount" class="font-semibold text-slate-800">₹0.00</span>
+          </div>
+          <div id="sgstRow" class="flex justify-between text-slate-600">
+            <span>State Tax (SGST):</span>
+            <span id="sgstAmount" class="font-semibold text-slate-800">₹0.00</span>
+          </div>
+          <div id="igstRow" class="hidden flex justify-between text-slate-600">
+            <span>Integrated Tax (IGST):</span>
+            <span id="igstAmount" class="font-semibold text-slate-800">₹0.00</span>
+          </div>
+          <div class="flex justify-between text-sm font-extrabold text-slate-900 border-t border-slate-200 pt-2 mt-2">
+            <span>Total Payable:</span>
+            <span id="grandTotal" class="text-indigo-700">₹0.00</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODALS -->
+  <div id="templateModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-200">
+      <h3 class="text-sm font-bold text-slate-900 mb-2">Invoice Style Templates</h3>
+      <p class="text-xs text-slate-500 mb-4">Select a layout from the style switcher on top: Modern Indigo, Corporate Formal, Executive Emerald, or Vibrant Violet.</p>
+      <button onclick="closeModal('templateModal')" class="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold">Understood</button>
+    </div>
+  </div>
+
+  <div id="clientDirectoryModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-sm font-bold text-slate-900">Saved Clients</h3>
+        <button onclick="closeModal('clientDirectoryModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="savedClientsList" class="space-y-2 max-h-60 overflow-y-auto text-xs text-slate-600">
+        <!-- JS rendered client items -->
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETE FUNCTIONAL LOGIC -->
+  <script>
+    const gstStates = [
+      { code: "27", name: "Maharashtra" }, { code: "07", name: "Delhi" },
+      { code: "29", name: "Karnataka" }, { code: "33", name: "Tamil Nadu" },
+      { code: "09", name: "Uttar Pradesh" }, { code: "19", name: "West Bengal" },
+      { code: "24", name: "Gujarat" }, { code: "23", name: "Madhya Pradesh" },
+      { code: "08", name: "Rajasthan" }, { code: "36", name: "Telangana" }
+    ];
+
+    let items = [
+      { desc: "Full-Stack Web Application Development & Deployment", hsn: "998314", qty: 1, rate: 60000, gst: 18 }
+    ];
+
+    let isPreview = false;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      populateStates();
+      loadSavedProfile();
+      renderItems();
+      renderQRCode();
+      
+      const today = new Date();
+      const due = new Date();
+      due.setDate(today.getDate() + 14);
+      
+      const invDateElem = document.getElementById("invDate");
+      const dueDateElem = document.getElementById("dueDate");
+      if(invDateElem) invDateElem.valueAsDate = today;
+      if(dueDateElem) dueDateElem.valueAsDate = due;
+
+      updateInvoice();
+    });
+
+    function populateStates() {
+      const sState = document.getElementById("sellerState");
+      const cState = document.getElementById("clientState");
+      [sState, cState].forEach(el => {
+        if(!el) return;
+        el.innerHTML = gstStates.map(s => `<option value="${s.code}">${s.code} - ${s.name}</option>`).join("");
+      });
+      if(sState) sState.value = "27";
+      if(cState) cState.value = "27";
+    }
+
+    function renderItems() {
+      const tbody = document.getElementById("lineItemsTableBody");
+      if(!tbody) return;
+      tbody.innerHTML = items.map((it, idx) => `
+        <tr>
+          <td class="p-3"><input type="text" value="${it.desc}" oninput="items[${idx}].desc=this.value" class="w-full bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none"></td>
+          <td class="p-3"><input type="text" value="${it.hsn}" oninput="items[${idx}].hsn=this.value" class="w-full bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none"></td>
+          <td class="p-3 text-center"><input type="number" min="1" value="${it.qty}" oninput="items[${idx}].qty=parseFloat(this.value)||0; updateInvoice();" class="w-14 text-center bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none"></td>
+          <td class="p-3 text-right"><input type="number" min="0" value="${it.rate}" oninput="items[${idx}].rate=parseFloat(this.value)||0; updateInvoice();" class="w-24 text-right bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none"></td>
+          <td class="p-3 text-center">
+            <select onchange="items[${idx}].gst=parseFloat(this.value); updateInvoice();" class="bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none">
+              <option value="0" ${it.gst===0?'selected':''}>0%</option>
+              <option value="5" ${it.gst===5?'selected':''}>5%</option>
+              <option value="12" ${it.gst===12?'selected':''}>12%</option>
+              <option value="18" ${it.gst===18?'selected':''}>18%</option>
+              <option value="28" ${it.gst===28?'selected':''}>28%</option>
+            </select>
+          </td>
+          <td class="p-3 text-right font-semibold">₹${(it.qty * it.rate).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+          <td class="p-3 text-center no-print">
+            <button onclick="removeItem(${idx})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash-can"></i></button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function addNewLineItem() {
+      items.push({ desc: "Consulting / Professional Services", hsn: "998311", qty: 1, rate: 5000, gst: 18 });
+      renderItems();
+      updateInvoice();
+    }
+
+    function removeItem(idx) {
+      if(items.length > 1) {
+        items.splice(idx, 1);
+        renderItems();
+        updateInvoice();
+      }
+    }
+
+    function addPresetItem(tag, desc, hsn, rate) {
+      items.push({ desc, hsn, qty: 1, rate, gst: 18 });
+      renderItems();
+      updateInvoice();
+    }
+
+    function updateInvoice() {
+      let taxable = 0, taxTotal = 0;
+      items.forEach(it => {
+        const lineVal = (it.qty || 0) * (it.rate || 0);
+        taxable += lineVal;
+        taxTotal += (lineVal * (it.gst || 0)) / 100;
+      });
+
+      const supplyType = document.getElementById("supplyType").value;
+      const cgstRow = document.getElementById("cgstRow");
+      const sgstRow = document.getElementById("sgstRow");
+      const igstRow = document.getElementById("igstRow");
+
+      if (supplyType === "INTER_STATE") {
+        cgstRow.classList.add("hidden");
+        sgstRow.classList.add("hidden");
+        igstRow.classList.remove("hidden");
+        document.getElementById("igstAmount").innerText = `₹${taxTotal.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+      } else {
+        cgstRow.classList.remove("hidden");
+        sgstRow.classList.remove("hidden");
+        igstRow.classList.add("hidden");
+        const half = taxTotal / 2;
+        document.getElementById("cgstAmount").innerText = `₹${half.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        document.getElementById("sgstAmount").innerText = `₹${half.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+      }
+
+      const total = taxable + taxTotal;
+      document.getElementById("taxableAmount").innerText = `₹${taxable.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+      document.getElementById("grandTotal").innerText = `₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+
+      // Update banners
+      document.getElementById("dispBizName").innerText = document.getElementById("sellerName").value || "Apex Digital Studios";
+      document.getElementById("dispSellerGstin").innerText = `GSTIN: ${document.getElementById("sellerGstin").value} | PAN: ${document.getElementById("sellerPan").value}`;
+      document.getElementById("dispSellerAddress").innerText = document.getElementById("sellerAddress").value;
+      document.getElementById("dispSellerContact").innerText = `${document.getElementById("sellerPhone").value} | ${document.getElementById("sellerUpi").value}`;
+      document.getElementById("dispUpiId").innerText = document.getElementById("sellerUpi").value;
+
+      renderQRCode(total);
+    }
+
+    function renderQRCode(amt) {
+      const qrContainer = document.getElementById("qrcode");
+      if(!qrContainer) return;
+      qrContainer.innerHTML = "";
+      const upiId = document.getElementById("sellerUpi").value || "billing@bank";
+      const name = encodeURIComponent(document.getElementById("sellerName").value || "Business");
+      const amountVal = amt ? amt.toFixed(2) : "100.00";
+      const upiUrl = `upi://pay?pa=${upiId}&pn=${name}&am=${amountVal}&cu=INR`;
+      new QRCode(qrContainer, { text: upiUrl, width: 88, height: 88 });
+    }
+
+    function handleSellerStateChange() {
+      autoDetectSupplyType();
+      updateInvoice();
+    }
+
+    function handleClientStateChange() {
+      autoDetectSupplyType();
+      updateInvoice();
+    }
+
+    function autoDetectSupplyType() {
+      const sState = document.getElementById("sellerState").value;
+      const cState = document.getElementById("clientState").value;
+      const typeElem = document.getElementById("supplyType");
+      if (sState === cState) {
+        typeElem.value = "INTRA_STATE";
+      } else {
+        typeElem.value = "INTER_STATE";
+      }
+    }
+
+    function handleSellerGstinChange() {
+      const gstin = document.getElementById("sellerGstin").value.trim().toUpperCase();
+      if(gstin.length >= 2) {
+        const code = gstin.substring(0, 2);
+        const stateElem = document.getElementById("sellerState");
+        if(stateElem && [...stateElem.options].some(o => o.value === code)) {
+          stateElem.value = code;
+          autoDetectSupplyType();
+        }
+      }
+      if(gstin.length >= 12) {
+        document.getElementById("sellerPan").value = gstin.substring(2, 12);
+      }
+      updateInvoice();
+    }
+
+    function handleClientGstinChange() {
+      const gstin = document.getElementById("clientGstin").value.trim().toUpperCase();
+      if(gstin.length >= 2) {
+        const code = gstin.substring(0, 2);
+        const stateElem = document.getElementById("clientState");
+        if(stateElem && [...stateElem.options].some(o => o.value === code)) {
+          stateElem.value = code;
+          autoDetectSupplyType();
+        }
+      }
+      updateInvoice();
+    }
+
+    function saveSellerProfile() {
+      const profile = {
+        name: document.getElementById("sellerName").value,
+        gstin: document.getElementById("sellerGstin").value,
+        pan: document.getElementById("sellerPan").value,
+        state: document.getElementById("sellerState").value,
+        address: document.getElementById("sellerAddress").value,
+        upi: document.getElementById("sellerUpi").value,
+        phone: document.getElementById("sellerPhone").value
+      };
+      localStorage.setItem("gst_profile", JSON.stringify(profile));
+      alert("Seller profile saved successfully!");
+    }
+
+    function loadSavedProfile() {
+      const raw = localStorage.getItem("gst_profile");
+      if(!raw) return;
+      try {
+        const p = JSON.parse(raw);
+        if(p.name) document.getElementById("sellerName").value = p.name;
+        if(p.gstin) document.getElementById("sellerGstin").value = p.gstin;
+        if(p.pan) document.getElementById("sellerPan").value = p.pan;
+        if(p.state) document.getElementById("sellerState").value = p.state;
+        if(p.address) document.getElementById("sellerAddress").value = p.address;
+        if(p.upi) document.getElementById("sellerUpi").value = p.upi;
+        if(p.phone) document.getElementById("sellerPhone").value = p.phone;
+      } catch(e) {}
+    }
+
+    function setLayoutStyle(style) {
+      const banner = document.getElementById("invoiceHeaderBanner");
+      banner.className = "p-5 rounded-xl border mb-8 flex flex-wrap justify-between items-start gap-4";
+      
+      document.querySelectorAll(".style-pill").forEach(p => {
+        p.className = "style-pill px-3 py-1.5 rounded-lg text-xs font-bold transition border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100";
+      });
+
+      const activeBtn = document.querySelector(`[data-style="${style}"]`);
+      if(activeBtn) {
+        activeBtn.className = "style-pill px-3 py-1.5 rounded-lg text-xs font-bold transition border border-indigo-600 bg-indigo-600 text-white";
+      }
+
+      if(style === 'modern') {
+        banner.classList.add("bg-indigo-50/60", "border-indigo-200");
+      } else if(style === 'corporate') {
+        banner.classList.add("bg-slate-100", "border-slate-300");
+      } else if(style === 'executive') {
+        banner.classList.add("bg-emerald-50", "border-emerald-200");
+      } else if(style === 'vibrant') {
+        banner.classList.add("bg-purple-50", "border-purple-200");
+      }
+    }
+
+    function togglePreviewMode() {
+      isPreview = !isPreview;
+      const editor = document.getElementById("editorControls");
+      const printStrip = document.getElementById("printMetadataStrip");
+      const printParties = document.getElementById("printPartiesBox");
+      const text = document.getElementById("previewBtnText");
+
+      if (isPreview) {
+        editor.classList.add("hidden");
+        printStrip.classList.remove("hidden");
+        printParties.classList.remove("hidden");
+        
+        document.getElementById("printInvNumber").innerText = document.getElementById("invNumber").value;
+        document.getElementById("printInvDate").innerText = document.getElementById("invDate").value;
+        document.getElementById("printDueDate").innerText = document.getElementById("dueDate").value;
+        document.getElementById("printSupplyType").innerText = document.getElementById("supplyType").value === "INTRA_STATE" ? "Intra-State (CGST+SGST)" : "Inter-State (IGST)";
+        
+        document.getElementById("printClientName").innerText = document.getElementById("clientName").value;
+        document.getElementById("printClientAddress").innerText = document.getElementById("clientAddress").value;
+        document.getElementById("printClientGstin").innerText = `GSTIN: ${document.getElementById("clientGstin").value || 'Unregistered'}`;
+        
+        const stateSelect = document.getElementById("clientState");
+        document.getElementById("printClientState").innerText = stateSelect.options[stateSelect.selectedIndex].text;
+        document.getElementById("printPlaceOfSupply").innerText = stateSelect.options[stateSelect.selectedIndex].text;
+
+        text.innerText = "Edit Mode";
+      } else {
+        editor.classList.remove("hidden");
+        printStrip.classList.add("hidden");
+        printParties.classList.add("hidden");
+        text.innerText = "Preview";
+      }
+    }
+
+    function shareViaWhatsApp() {
+      const inv = document.getElementById("invNumber").value;
+      const client = document.getElementById("clientName").value;
+      const total = document.getElementById("grandTotal").innerText;
+      const msg = encodeURIComponent(`Hi ${client}, please find your Tax Invoice (${inv}) of ${total}. Let me know if you have any questions.`);
+      window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+    }
+
+    function downloadPDF() {
+      if(!isPreview) togglePreviewMode();
+      setTimeout(() => {
+        const sheet = document.getElementById("invoiceSheet");
+        const opt = {
+          margin: 8,
+          filename: `${document.getElementById("invNumber").value || 'Invoice'}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(sheet).save().then(() => {
+          if(isPreview) togglePreviewMode();
+        });
+      }, 300);
+    }
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if(el) el.classList.remove("hidden");
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if(el) el.classList.add("hidden");
+    }
+
+        function saveCurrentClientToDirectory() {
+      const name = document.getElementById("clientName").value;
+      const gstin = document.getElementById("clientGstin").value;
+      if(!name) return alert("Please enter client name");
+      
+      let directory = JSON.parse(localStorage.getItem("gst_clients") || "[]");
+      directory.push({ 
+        name, 
+        gstin, 
+        phone: document.getElementById("clientPhone").value, 
+        address: document.getElementById("clientAddress").value 
+      });
+      localStorage.setItem("gst_clients", JSON.stringify(directory));
+      alert(`Client "${name}" added to Address Book.`);
+    }
+  </script>
+</body>
+</html>
+
+  
+
+                             
